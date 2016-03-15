@@ -1,3 +1,6 @@
+// License:  GNU Affero General Public License v3 (AGPL-3.0)
+// https://tldrlegal.com/license/gnu-affero-general-public-license-v3-(agpl-3.0)
+
 "use strict";
 
 function initMap(center, controller) {

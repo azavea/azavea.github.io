@@ -1,3 +1,6 @@
+// License:  GNU Affero General Public License v3 (AGPL-3.0)
+// https://tldrlegal.com/license/gnu-affero-general-public-license-v3-(agpl-3.0)
+
 function StreetPoint(data /* StreetViewPanoramaData */) {
     this.pano = data.location.pano;
     this.lat = data.location.latLng.lat();
