@@ -76,7 +76,7 @@ function initStreetView(location, controller) {
     }
 
     function onPanoramaClick(e) {
-        if (e.target.nodeName === 'svg') {
+        if (e.target.nodeName === 'svg' || e.target.nodeName === 'CANVAS') {
             var heading = getHeading(panorama, e);
             controller.fireRay(heading);
             e.stopPropagation();
