@@ -76,21 +76,13 @@ function initMap(center, controller) {
         return new google.maps.Polyline({
             path: [
                 streetPoint.latLng,
-                getOffsetPoint(streetPoint.latLng, 90 - heading, 1)
+                streetPoint.getOffsetPoint(heading)
             ],
             strokeColor: isCurrent ? 'Red' : 'Orange',
             strokeOpacity: 1.0,
             strokeWeight: 1,
             map: map
         });
-    }
-
-    function getOffsetPoint(p, heading, length) {
-        heading = heading * DEGREES_TO_RADIANS;
-        return {
-            lat: p.lat + length * Math.sin(heading),
-            lng: p.lng + length * Math.cos(heading)
-        }
     }
 
     function updateStreetPointMarkers(state) {
@@ -115,7 +107,7 @@ function initMap(center, controller) {
     function updateTreeMarkers(state) {
         var newMarkers = _.map(state.trees, function (tree) {
             var isCurrent = (tree === state.currentTree),
-                marker = addMarker(tree, {
+                marker = addMarker(tree.latLng, {
                     path: google.maps.SymbolPath.CIRCLE,
                     fillColor: isCurrent ? 'Lime' : 'Green',
                     fillOpacity: 0.8,

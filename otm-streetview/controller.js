@@ -14,6 +14,7 @@ var panoDict = {},
 
 function initSite() {
     var exports = {
+            getState: getState,
             setCurrentPano: setCurrentPano,
             setCurrentStreetPoint: setCurrentStreetPoint,
             setCurrentTree: setCurrentTree,
@@ -21,7 +22,11 @@ function initSite() {
             fireRay: fireRay
         };
 
-    var location = {lat: 44.94406, lng: -93.2256788};
+    var location = {lat: 44.94406, lng: -93.2256788}; // South Minneapolis
+    //var location = {lat: 65.8381615, lng: 24.1310685}; // Haparanda, Norway
+    //var location = {lat: -0.0205497, lng: -51.1695488}; // Santana, Brazil
+    //var location = {lat: 40.0546062, lng: -75.1959133}; // Northwest Philly
+
     init(location);
 
     function init(location) {
@@ -35,7 +40,7 @@ function initSite() {
 
         viewUpdaters = [
             initMap(location, exports),
-            initStreetView(location, exports)
+            initStreetView(exports)
         ];
     }
 
@@ -98,13 +103,18 @@ function initSite() {
     }
 
     function setCurrentTree(tree) {
-        new google.maps.StreetViewService().getPanoramaByLocation(tree, 50, function (data, status) {
-            if (status == google.maps.StreetViewStatus.OK) {
-                currentTree = tree;
-                setCurrentPano(data.location.pano);
-                updateViews();
-            }
-        });
+        if (tree) {
+            new google.maps.StreetViewService().getPanoramaByLocation(tree.latLng, 50, function (data, status) {
+                if (status == google.maps.StreetViewStatus.OK) {
+                    currentTree = tree;
+                    setCurrentPano(data.location.pano);
+                    updateViews();
+                }
+            });
+        } else {
+            currentTree = null;
+            updateViews();
+        }
     }
 
     function updateCurrentRayHeading(heading) {
@@ -120,7 +130,9 @@ function initSite() {
             return intersection;
         });
         if (intersection) {
-            trees.push(intersection);
+            trees.push({
+                latLng: intersection
+            });
         } else {
             currentStreetPoint.addRay(heading);
         }
@@ -135,16 +147,20 @@ function initSite() {
     }
 
     function updateViews() {
-        var state = {
+        var state = getState();
+        _.each(viewUpdaters, function (update) {
+            update(state);
+        });
+    }
+
+    function getState() {
+        return {
             streetPoints: streetPoints,
             currentStreetPoint: currentStreetPoint,
             trees: trees,
             currentTree: currentTree,
             currentRayHeading: currentRayHeading
         };
-        _.each(viewUpdaters, function (update) {
-            update(state);
-        });
     }
 
 }

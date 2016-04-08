@@ -32,7 +32,7 @@ function StreetPoint(data /* StreetViewPanoramaData */) {
             var intersection = self._getIntersection(newRay, heading);
             if (intersection) {
                 self.rayHeadings = _.without(self.rayHeadings, heading);
-                latLng = {lat: intersection.y, lng: intersection.x}
+                latLng = intersection
             }
             return intersection;
         });
@@ -41,26 +41,56 @@ function StreetPoint(data /* StreetViewPanoramaData */) {
 
     var DEGREES_TO_RADIANS = Math.PI / 180;
 
+    this.getOffsetPoint = function (heading) {
+        var p = latLngToWebMercator(this.latLng),
+            p2 = getOffsetPoint(p, heading),
+            result = webMercatorToLatLng(p2);
+        return result;
+    };
+
     this._getIntersection = function (newRay, myRayHeading) {
-        var p1 = this,
+        var p1 = latLngToWebMercator(this.latLng),
             h1 = myRayHeading,
-            p2 = newRay.streetPoint,
+            p2 = latLngToWebMercator(newRay.streetPoint),
             h2 = newRay.heading,
             v1 = makeLine(p1, h1),
-            v2 = makeLine(p2, h2);
+            v2 = makeLine(p2, h2),
+            p = getVectorIntersection(v1, v2),
+            result = webMercatorToLatLng(p);
 
-        return getVectorIntersection(v1, v2);
+        return result;
 
         function makeLine(p, h) {
-            h = h * DEGREES_TO_RADIANS;
-            return {
-                x1: p.lng,
-                y1: p.lat,
-                x2: p.lng + Math.sin(h),
-                y2: p.lat + Math.cos(h)
-            }
+            var p2 = getOffsetPoint(p, h);
+            return { x1: p.x, y1: p.y, x2: p2.x, y2: p2.y };
         }
     };
+
+    function getOffsetPoint(p, h) {
+        var length = 100000;
+        h = h * DEGREES_TO_RADIANS;
+        return {
+            x: p.x + length * Math.sin(h),
+            y: p.y + length * Math.cos(h)
+        }
+    }
+
+    function latLngToWebMercator(latLng) {
+        var originShift = (2.0 * Math.PI * (6378137.0 / 2.0)) / 180.0;
+        return {
+            x: originShift * latLng.lng,
+            y: originShift * (Math.log(Math.tan((90.0 + latLng.lat) * (Math.PI / 360.0)))) / (Math.PI / 180.0)
+        };
+    }
+
+    function webMercatorToLatLng(p) {
+        var originShift =  (2.0 * Math.PI * 6378137.0 / 2.0) / 180.0;
+        var d2r = Math.PI / 180.0;
+        var r2d = 180.0 / Math.PI;
+
+        var lat = r2d * ((2.0 * Math.atan(Math.exp(d2r * p.y / originShift))) - Math.PI / 2.0);
+        return {lat: lat, lng: p.x / originShift};
+    }
 
     function getVectorIntersection(v1, v2) {
         // http://paulbourke.net/geometry/pointlineplane/
