@@ -73,6 +73,7 @@ function initStreetViewMeasure(controller, panorama, $panorama, $overlayContaine
                 '<div class="axis"></div>' +
                 '<div class="edge-left"></div>' +
                 '<div class="edge-right"></div>' +
+                '<div id="diameter-display"></div>' +
             '</div>'));
         var tree = controller.getState().currentTree,
             $edgeLeft = $('.edge-left'),
@@ -115,11 +116,13 @@ function initStreetViewMeasure(controller, panorama, $panorama, $overlayContaine
             leftPosition = $edgeLeft.offset().left + $edgeRight.width(),
             pixels =  rightPosition - leftPosition,
             dist = getMetersFromCameraToTree(),
-            diameterMeters = pixels * dist / focalLength;
-        tree.diameter = diameterMeters * METERS_TO_INCHES;
-
+            diameterMeters = pixels * dist / focalLength,
+            diameterInches = diameterMeters * METERS_TO_INCHES;
+        tree.diameter = diameterInches;
         tree.leftHandlePosition = $edgeLeft.css('left');
         tree.rightHandlePosition = $edgeRight.css('left');
+
+        $('#diameter-display').text(diameterInches.toFixed(1));
 
         //window.console.log(
         //    ' dist=' + dist +

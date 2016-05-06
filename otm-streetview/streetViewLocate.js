@@ -13,7 +13,10 @@ function initStreetViewLocate(controller, panorama, $panorama, $overlayContainer
     };
 
     function enableMode() {
-        panorama.setOptions({linksControl: true});
+        panorama.setOptions({
+            linksControl: true,
+            imageDateControl: true  // appears to have no effect
+        });
         showHorizontalPosition();
         handleClickNotDrag();
     }
